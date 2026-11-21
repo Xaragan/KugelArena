@@ -65,8 +65,11 @@ so Steam shows everyone as playing "Spacewar".
 1. Host: Play with friends -> "Host a game and invite friends". In the lobby pick
    a friend from the list of friends who are online and press "Invite selected
    friend". Choose Duel or 4 / 6 / 8 balls, then "Start the game".
-2. Friend: start the game, open "Play with friends" and accept the invite in
-   Steam. Or pick the host under "Friends who are hosting right now" and press Join.
+2. Friend: start KugelArena first, then accept the invite in Steam. The game must
+   already be running: the borrowed test app id belongs to Valve's "Spacewar", so
+   Steam starts that instead when it finds no running game to hand the invite to.
+   Two ways without an invite: pick the host under "Friends who are hosting right
+   now" and press Join, or paste the lobby code the host copied in the lobby.
 3. After a round the host presses Space for the next one. M leaves the game.
 
 **Without Steam.** "Host on this PC" opens port 24800 (UDP); friends type the

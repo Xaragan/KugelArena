@@ -21,7 +21,7 @@ const NetGame = preload("res://game/net_game.gd")
 
 const NET_PATH := "res://net/rival_net.json"
 ## Version of this build; compared with the newest release on GitHub at start.
-const VERSION := "0.2"
+const VERSION := "0.3"
 const RELEASES_API := "https://api.github.com/repos/Xaragan/KugelArena/releases/latest"
 const DOWNLOAD_PAGE := "github.com/Xaragan/KugelArena/releases/latest"
 const RUNS_DIR := "res://training/runs"
@@ -128,6 +128,10 @@ var lobby_invites: ItemList
 var lobby_invite_ids: Array = []
 var lobby_invite_button: Button
 var lobby_start: Button
+var lobby_code: Label
+var lobby_copy: Button
+var code_edit: LineEdit
+var refresh_timer := 0.0
 var state := STATE_READY
 var state_time := 0.0
 var score: Array[int] = [0, 0]
@@ -209,6 +213,11 @@ func _ready() -> void:
 	_scan_runs()
 	_build_controls()
 	_build_net_controls()
+	# Connect to Steam right away (silently if Steam is not running). Only then
+	# does Steam hand an accepted invite to this game; otherwise it would start
+	# the real "Spacewar", which owns the test app id this game borrows.
+	if not ("--no-steam" in args):
+		net.init_steam()
 	sim.reset(1)
 	# --host-lan hosts a direct-connection game at once, --join=ADDRESS joins one.
 	for arg in args:
@@ -768,19 +777,25 @@ func _build_net_controls() -> void:
 	friends_panel.add_child(friends_list)
 	_button(friends_panel, "Join", Rect2(512, 210, 158, 40), _join_selected_friend)
 	_button(friends_panel, "Refresh", Rect2(512, 258, 158, 34), _refresh_friends)
-	_label(friends_panel, "You can also accept a friend's invite in Steam while this screen is open.",
-		Vector2(30, 338), 12, COL_DIM)
+	code_edit = LineEdit.new()
+	code_edit.position = Vector2(30, 338)
+	code_edit.size = Vector2(470, 36)
+	code_edit.placeholder_text = "or paste the lobby code the host sent you"
+	friends_panel.add_child(code_edit)
+	_button(friends_panel, "Join with code", Rect2(512, 338, 158, 36), _join_code)
+	_label(friends_panel, "A Steam invite also works, as long as this game is already running when you accept it.",
+		Vector2(30, 380), 12, COL_DIM)
 	_label(friends_panel, "Without Steam (same network, or a forwarded port %d)" % NetGame.DEFAULT_PORT,
-		Vector2(30, 384), 14, COL_DIM)
-	_button(friends_panel, "Host on this PC", Rect2(30, 412, 200, 40), func() -> void: net.host_lan())
+		Vector2(30, 410), 14, COL_DIM)
+	_button(friends_panel, "Host on this PC", Rect2(30, 436, 200, 40), func() -> void: net.host_lan())
 	address_edit = LineEdit.new()
-	address_edit.position = Vector2(250, 412)
+	address_edit.position = Vector2(250, 436)
 	address_edit.size = Vector2(250, 40)
 	address_edit.placeholder_text = "host's address, e.g. 192.168.0.12"
 	friends_panel.add_child(address_edit)
-	_button(friends_panel, "Join address", Rect2(512, 412, 158, 40),
+	_button(friends_panel, "Join address", Rect2(512, 436, 158, 40),
 		func() -> void: net.join_lan(address_edit.text if address_edit.text != "" else "127.0.0.1"))
-	_button(friends_panel, "Back   (Esc)", Rect2(30, 482, 200, 38), func() -> void: _set_mode(MODE_MENU))
+	_button(friends_panel, "Back   (Esc)", Rect2(30, 490, 200, 38), func() -> void: _set_mode(MODE_MENU))
 
 	# Lobby.
 	lobby_panel = Panel.new()
@@ -813,6 +828,8 @@ With more players than balls the round grows.",
 	lobby_invites.focus_mode = Control.FOCUS_NONE
 	lobby_panel.add_child(lobby_invites)
 	lobby_invite_button = _button(lobby_panel, "Invite selected friend", Rect2(360, 460, 310, 36), _invite_selected)
+	lobby_code = _label(lobby_panel, "", Vector2(30, 410), 13, COL_TEXT)
+	lobby_copy = _button(lobby_panel, "Copy lobby code", Rect2(30, 460, 200, 36), _copy_lobby_code)
 	lobby_start = _button(lobby_panel, "Start the game", Rect2(30, 516, 320, 46), _host_start)
 	_button(lobby_panel, "Leave   (Esc)", Rect2(470, 516, 200, 46), func() -> void: _set_mode(MODE_MENU))
 
@@ -840,6 +857,22 @@ func _refresh_friends() -> void:
 		friends_list.set_item_disabled(0, true)
 
 
+func _join_code() -> void:
+	var digits := ""
+	for c in code_edit.text:
+		if c >= "0" and c <= "9":
+			digits += c
+	if digits.length() < 6:
+		friends_status.text = "That does not look like a lobby code. The host finds it in the lobby (Copy lobby code)."
+		return
+	net.join_steam(digits.to_int())
+
+
+func _copy_lobby_code() -> void:
+	DisplayServer.clipboard_set(str(net.lobby_id))
+	lobby_status.text = "Lobby code copied. Send it to your friend; they paste it under Play with friends."
+
+
 func _join_selected_friend() -> void:
 	var picked := friends_list.get_selected_items()
 	if not picked.is_empty() and picked[0] < friends_ids.size():
@@ -865,6 +898,9 @@ func _refresh_lobby() -> void:
 	var can_invite: bool = net.hosting and net.via_steam
 	lobby_invites.visible = can_invite
 	lobby_invite_button.visible = can_invite
+	lobby_copy.visible = can_invite
+	lobby_code.visible = can_invite
+	lobby_code.text = "Lobby code, if the invite does not work:\n%d" % net.lobby_id
 	if can_invite:
 		var keep := lobby_invites.get_selected_items()
 		lobby_invites.clear()
@@ -880,7 +916,7 @@ func _invite_selected() -> void:
 	var picked := lobby_invites.get_selected_items()
 	if not picked.is_empty():
 		net.invite(lobby_invite_ids[picked[0]])
-		lobby_status.text = "Invite sent to %s. They accept it in Steam while their game shows \"Play with friends\"." % \
+		lobby_status.text = "Invite sent to %s. Their KugelArena must already be running when they accept it." % \
 			lobby_invites.get_item_text(picked[0])
 
 
@@ -1200,6 +1236,12 @@ func _physics_process(delta: float) -> void:
 	for i in fall_time.size():
 		if fall_time[i] >= 0.0:
 			fall_time[i] += delta
+	if mode == MODE_FRIENDS or mode == MODE_LOBBY:
+		# Friends come and go; keep the lists current.
+		refresh_timer += delta
+		if refresh_timer >= 3.0:
+			refresh_timer = 0.0
+			_refresh_friends()
 	if net_role == "client":
 		if mode == MODE_PLAY:
 			_client_step(delta)
