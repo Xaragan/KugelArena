@@ -1,7 +1,7 @@
 extends RefCounted
 ## The rival's brain: a small fully connected net, evaluated in plain GDScript.
 ##
-## 47 inputs (see ArenaSim.observe) -> 32 tanh -> 16 tanh -> 2 tanh.
+## 49 inputs (see ArenaSim.observe) -> 32 tanh -> 16 tanh -> 2 tanh.
 ## The two outputs are a thrust vector in the ball's own frame (x = towards the
 ## nearest rival, y = a quarter turn to the left); act() turns it back into arena space.
 ## All weights live in one flat array: per layer the weight matrix row by row
@@ -9,7 +9,7 @@ extends RefCounted
 
 const Sim = preload("res://sim/arena_sim.gd")
 
-const N_IN := 47
+const N_IN := 49
 const N_H1 := 32
 const N_H2 := 16
 const N_OUT := 2

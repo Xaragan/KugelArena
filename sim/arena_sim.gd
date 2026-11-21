@@ -31,18 +31,25 @@ const MIN_RADIUS := 0.0
 const DECISION_TICKS := 6
 
 # --- Collisions ---------------------------------------------------------------
+## Collisions are real physics: momentum is conserved, and RESTITUTION is the
+## share of the closing speed the balls separate with (1 = perfectly bouncy).
+## Two equal balls swap their speeds along the line of the hit; a heavier ball
+## pushes a lighter one away and is itself slowed less.
 const RESTITUTION := 0.9
-## Every hit is amplified by this, so collisions throw balls around more than
-## billiard physics would.
-const KNOCKBACK := 2.3
+## A hard hit knocks a ball into a skid: for a moment it has little grip, so it
+## slides on instead of stopping, and its own thrust does little. How long
+## depends on how hard it was hit: SKID_SECONDS for a change of speed of
+## MAX_SPEED or more, proportionally less for lighter hits.
+const SKID_SECONDS := 1.0
+const SKID_GRIP := 0.15
 ## A ball that falls within this many ticks of being hit counts as a knockout
 ## for whoever hit it last.
 const KNOCKOUT_TICKS := 120
 
 # --- Items --------------------------------------------------------------------
-const ITEM_POWER := 0   # your hits push twice as hard
+const ITEM_POWER := 0   # your ball gets heavy: it pushes harder and is pushed less
 const ITEM_SPEED := 1   # more thrust and top speed
-const ITEM_ANCHOR := 2  # you are pushed far less
+const ITEM_ANCHOR := 2  # grip: you slide far less after a hit
 const ITEM_FREEZE := 3  # everyone else's thrust drops
 const ITEM_SHOCK := 4   # instant blast that throws the others away from you
 const ITEM_KINDS := 5
@@ -59,9 +66,13 @@ const FX_ANCHOR := 2
 const FX_FROZEN := 3
 const FX_COUNT := 4
 const FX_DURATION: Array[float] = [6.0, 6.0, 6.0, 4.0]
-const POWER_FACTOR := 2.0
+## Power makes the ball this many times as heavy. Its thrust grows with it, so
+## it is as nimble as before.
+const POWER_MASS := 2.5
 const SPEED_FACTOR := 1.6
-const ANCHOR_FACTOR := 0.35
+## Anchor multiplies the ball's grip on the disc (drag and thrust alike): same
+## top speed, but it stops and turns this many times as fast.
+const ANCHOR_GRIP := 2.5
 const FREEZE_FACTOR := 0.4
 const SHOCK_IMPULSE := 5.0
 const SHOCK_RANGE := 8.0
@@ -75,7 +86,7 @@ const WIN_0 := 0
 const WIN_1 := 1
 
 ## Number of inputs observe() writes.
-const OBS_SIZE := 47
+const OBS_SIZE := 49
 
 var n := 2                                # number of balls in this game
 var pos := PackedVector2Array()
@@ -85,6 +96,7 @@ var alive := PackedByteArray()            # 1 while the ball is on the disc
 var place := PackedInt32Array()           # 0 while alive, then 1 (winner) .. n
 var knockouts := PackedInt32Array()       # rivals this ball pushed off
 var fx := PackedFloat32Array()            # [who * FX_COUNT + effect] = seconds left
+var skid := PackedFloat32Array()          # seconds of skidding left, per ball
 var item_kind := PackedInt32Array()       # -1 = empty slot
 var item_pos := PackedVector2Array()
 var radius := ARENA_RADIUS                # current radius of the disc
@@ -129,6 +141,8 @@ func reset(game_seed: int, time_limit_seconds: float = 0.0, balls: int = 2) -> v
 	alive_count = n
 	fx.resize(n * FX_COUNT)
 	fx.fill(0.0)
+	skid.resize(n)
+	skid.fill(0.0)
 	# More balls, more items: 2 slots in a duel, up to 4, and they come faster.
 	var slots := clampi(1 + n / 2, 2, 4)
 	item_kind.resize(slots)
@@ -162,13 +176,23 @@ func step() -> void:
 	for i in n:
 		if alive[i] == 0:
 			continue
+		# Accelerations, so a heavy (Power) ball steers like a light one.
 		var power := THRUST
+		var drag := DRAG
+		if fx[i * FX_COUNT + FX_ANCHOR] > 0.0:
+			power *= ANCHOR_GRIP
+			drag *= ANCHOR_GRIP
+		elif skid[i] > 0.0:
+			power *= SKID_GRIP
+			drag *= SKID_GRIP
+		if skid[i] > 0.0:
+			skid[i] = maxf(0.0, skid[i] - DT)
 		if fx[i * FX_COUNT + FX_SPEED] > 0.0:
 			power *= SPEED_FACTOR
 		if fx[i * FX_COUNT + FX_FROZEN] > 0.0:
 			power *= FREEZE_FACTOR
 		var v := vel[i]
-		v += (thrust[i] * power - v * DRAG) * DT
+		v += (thrust[i] * power - v * drag) * DT
 		vel[i] = v
 		pos[i] += v * DT
 	if tick > SHRINK_START * TICKS_PER_SECOND and radius > MIN_RADIUS:
@@ -190,12 +214,8 @@ func step() -> void:
 	_check_end()
 
 
-func _push_factor(who: int) -> float:
-	return POWER_FACTOR if fx[who * FX_COUNT + FX_POWER] > 0.0 else 1.0
-
-
-func _receive_factor(who: int) -> float:
-	return ANCHOR_FACTOR if fx[who * FX_COUNT + FX_ANCHOR] > 0.0 else 1.0
+func _mass(who: int) -> float:
+	return POWER_MASS if fx[who * FX_COUNT + FX_POWER] > 0.0 else 1.0
 
 
 func _collide(a: int, b: int) -> void:
@@ -205,22 +225,32 @@ func _collide(a: int, b: int) -> void:
 	if dist >= min_dist:
 		return
 	var normal := d / dist if dist > 0.0001 else Vector2.RIGHT
-	# Separate the balls so they never overlap.
-	var overlap := (min_dist - dist) * 0.5
-	pos[a] -= normal * overlap
-	pos[b] += normal * overlap
+	var inv_a := 1.0 / _mass(a)
+	var inv_b := 1.0 / _mass(b)
+	# Separate the balls so they never overlap; the lighter one gives way more.
+	var overlap := (min_dist - dist) / (inv_a + inv_b)
+	pos[a] -= normal * (overlap * inv_a)
+	pos[b] += normal * (overlap * inv_b)
 	var closing := (vel[a] - vel[b]).dot(normal)
 	if closing <= 0.0:
 		return
-	var impulse := (1.0 + RESTITUTION) * 0.5 * closing * KNOCKBACK
-	vel[a] -= normal * (impulse * _push_factor(b) * _receive_factor(a))
-	vel[b] += normal * (impulse * _push_factor(a) * _receive_factor(b))
+	# The same impulse acts on both balls, in opposite directions.
+	var impulse := (1.0 + RESTITUTION) * closing / (inv_a + inv_b)
+	vel[a] -= normal * (impulse * inv_a)
+	vel[b] += normal * (impulse * inv_b)
+	_knock(a, impulse * inv_a)
+	_knock(b, impulse * inv_b)
 	_last_hit_by[a] = b
 	_last_hit_by[b] = a
 	_last_hit_tick[a] = tick
 	_last_hit_tick[b] = tick
 	if record_events:
 		events.append({"type": "hit", "at": (pos[a] + pos[b]) * 0.5, "strength": impulse})
+
+
+## Starts or extends a skid after the ball's speed changed by `speed_change`.
+func _knock(who: int, speed_change: float) -> void:
+	skid[who] = maxf(skid[who], SKID_SECONDS * minf(1.0, speed_change / MAX_SPEED))
 
 
 func _pick_items() -> void:
@@ -266,7 +296,8 @@ func _apply_item(who: int, kind: int) -> void:
 				var dist := d.length()
 				if dist < SHOCK_RANGE and dist > 0.0001:
 					var falloff := 1.0 - dist / SHOCK_RANGE
-					vel[other] += d / dist * (SHOCK_IMPULSE * falloff * _receive_factor(other))
+					vel[other] += d / dist * (SHOCK_IMPULSE * falloff / _mass(other))
+					_knock(other, SHOCK_IMPULSE * falloff / _mass(other))
 					_last_hit_by[other] = who
 					_last_hit_tick[other] = tick
 
@@ -439,6 +470,9 @@ func observe(who: int, out: PackedFloat32Array) -> void:
 		out[at + 3] = vel[r].dot(ex) * inv_v
 		out[at + 4] = vel[r].dot(ey) * inv_v
 		out[at + 5] = (limit - pos[r].length()) * inv_r
+	# Skidding: how long this ball and the nearest rival still have little grip.
+	out[47] = skid[who] / SKID_SECONDS
+	out[48] = skid[other] / SKID_SECONDS
 
 
 func _observe_item(slot: int, at: int, p: Vector2, ex: Vector2, ey: Vector2,

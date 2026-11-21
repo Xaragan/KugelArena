@@ -20,6 +20,10 @@ const Profile = preload("res://sim/net_profile.gd")
 const NetGame = preload("res://game/net_game.gd")
 
 const NET_PATH := "res://net/rival_net.json"
+## Version of this build; compared with the newest release on GitHub at start.
+const VERSION := "0.2"
+const RELEASES_API := "https://api.github.com/repos/Xaragan/KugelArena/releases/latest"
+const DOWNLOAD_PAGE := "github.com/Xaragan/KugelArena/releases/latest"
 const RUNS_DIR := "res://training/runs"
 const PIXELS_PER_UNIT := 32.0
 const CENTRE := Vector2(640.0, 372.0)
@@ -54,8 +58,8 @@ const BALL_CHOICES: Array[int] = [2, 4, 6, 8]
 const COL_ITEM: Array[Color] = [Color(1.0, 0.78, 0.20), Color(0.40, 0.90, 0.45),
 	Color(0.66, 0.70, 0.85), Color(0.45, 0.90, 1.0), Color(0.92, 0.45, 0.95)]
 const ITEM_LETTER: Array[String] = ["P", "S", "A", "F", "X"]
-const ITEM_HELP: Array[String] = ["your hits push twice as hard", "more thrust and top speed",
-	"you are pushed far less", "the other ball gets sluggish", "blast that throws the other away"]
+const ITEM_HELP: Array[String] = ["heavy ball: pushes harder", "more thrust and top speed",
+	"grip: you slide far less", "the others get sluggish", "blast that throws the others away"]
 const FX_NAME: Array[String] = ["Power", "Speed", "Anchor", "Frozen"]
 const FX_COLOR: Array[Color] = [Color(1.0, 0.78, 0.20), Color(0.40, 0.90, 0.45),
 	Color(0.66, 0.70, 0.85), Color(0.45, 0.90, 1.0)]
@@ -157,6 +161,7 @@ var card_box: VBoxContainer
 var cards: Array = []
 var tier_buttons: Array = []
 var count_buttons: Array = []
+var update_label: Label
 var detail_name: Label
 var detail_pips: Pips
 var detail_line: Label
@@ -375,6 +380,8 @@ func _build_controls() -> void:
 		_start_review)
 	_label(menu_panel, "Up / Down: choose     Esc: quit", Vector2(530, 584), 12, COL_DIM)
 	_set_tier("")
+	update_label = _label(menu_panel, "", Vector2(30, 588), 12, Color(1.0, 0.78, 0.2))
+	_check_for_update()
 
 	# Replay controls, right column.
 	review_box = Control.new()
@@ -423,6 +430,35 @@ func _build_controls() -> void:
 
 	menu_button = _button(self, "Menu  (M)", Rect2(1090, 630, 120, 32),
 		func() -> void: _set_mode(MODE_MENU))
+
+
+## Asks GitHub for the newest release and says so in the menu when it is newer
+## than this build. Nothing is downloaded; the player fetches the zip themselves.
+func _check_for_update() -> void:
+	var request := HTTPRequest.new()
+	request.timeout = 8.0
+	add_child(request)
+	request.request_completed.connect(func(_result: int, code: int, _headers: PackedStringArray,
+			body: PackedByteArray) -> void:
+		request.queue_free()
+		if code != 200:
+			return
+		var parsed: Variant = JSON.parse_string(body.get_string_from_utf8())
+		if typeof(parsed) != TYPE_DICTIONARY:
+			return
+		var latest := str((parsed as Dictionary).get("tag_name", "")).trim_prefix("v")
+		if latest != "" and _version_number(latest) > _version_number(VERSION):
+			update_label.text = "Version %s is out (you have %s). Download: %s" % [latest, VERSION,
+				DOWNLOAD_PAGE])
+	request.request(RELEASES_API, ["User-Agent: KugelArena"])
+
+
+func _version_number(text: String) -> float:
+	var parts := text.split(".")
+	var value := 0.0
+	for i in mini(parts.size(), 3):
+		value += float(parts[i].to_int()) / pow(1000.0, i)
+	return value
 
 
 ## Shows the opponents of one difficulty ("" = all) as cards.
