@@ -1,0 +1,95 @@
+<title>KugelArena Leaderboard</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: one column, the game's own night-blue disc palette; blue = duel, red = free-for-all, as the two balls in a duel. */
+:root {
+  color-scheme: dark;
+  --bg: #0d0f1a; --panel: #161a28; --line: #2a3046; --fg: #e1e5f4; --dim: #8c95b3;
+  --duel: #4d9eff; --ffa: #ff6652; --gold: #ffc733;
+  --display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --body: Inter, "Segoe UI", system-ui, sans-serif;
+}
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.55;
+  padding-block: 32px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+main { max-width: 920px; margin: 0 auto; display: flex; flex-direction: column; gap: 36px; }
+h1 { font-family: var(--display); font-size: 2.1rem; line-height: 1.1; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--display); font-size: 1.2rem; margin: 0 0 6px; text-wrap: balance; }
+header p, .note { color: var(--dim); margin: 6px 0 0; max-width: 65ch; }
+.lead { font-size: 1.05rem; max-width: 65ch; margin: 14px 0 0; color: var(--fg); }
+.chart { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-top: 12px; overflow-x: auto; }
+svg { display: block; width: 100%; min-width: 520px; height: auto; }
+.grid { stroke: var(--line); stroke-width: 1; }
+.tick { fill: var(--dim); font: 11px var(--body); }
+.lab { font: 600 12px var(--body); }
+.line { stroke-width: 2.5; stroke-linejoin: round; }
+.line.duel { stroke: var(--duel); } .line.ffa { stroke: var(--ffa); }
+.dot.duel { fill: var(--duel); } .dot.ffa { fill: var(--ffa); }
+.duel-lab { fill: var(--duel); } .ffa-lab { fill: var(--ffa); }
+.chance { stroke: var(--dim); stroke-width: 1; stroke-dasharray: 4 4; } .chance-lab { fill: var(--dim); font-weight: 400; }
+.table { overflow-x: auto; margin-top: 12px; }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-variant-numeric: tabular-nums; }
+th { text-align: left; font: 500 11px var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--dim); padding: 0 10px 8px; }
+td { padding: 9px 10px; border-top: 1px solid var(--line); vertical-align: middle; }
+td small { display: block; color: var(--dim); font-size: 12px; }
+.num { text-align: right; } th.num { text-align: right; }
+.score { font-family: var(--display); font-weight: 700; color: var(--gold); }
+.bar { position: relative; background: var(--panel); border-radius: 4px; height: 22px; min-width: 110px; }
+.bar .fill { position: absolute; inset: 0 auto 0 0; border-radius: 4px; opacity: .55; }
+.fill.duel { background: var(--duel); } .fill.ffa { background: var(--ffa); }
+.bar b { position: relative; font-weight: 600; font-size: 13px; line-height: 22px; padding-left: 8px; }
+.kept { font-size: 11px; color: var(--gold); border: 1px solid var(--gold); border-radius: 99px; padding: 0 7px; margin-left: 6px; }
+.facts { list-style: none; padding: 0; margin: 12px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.facts li { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.facts b { display: block; font: 700 1.5rem var(--display); } .facts span { color: var(--dim); font-size: 13px; }
+.tour { overflow-x: auto; } .tour table { min-width: 520px; }
+</style>
+<main>
+<header>
+  <h1>KugelArena Leaderboard</h1>
+  <p>Every saved net, best first. Written 2026-11-22 00:01:26.</p>
+  <p class="lead">Best net right now: <strong>Rico the Finisher</strong>, age 140, after 16.4 minutes of training. Against the scripted bots it wins <strong>90.2 %</strong> of duels and <strong>35.0 %</strong> of four-ball free-for-alls, where winning by chance would be 25 %.</p>
+</header>
+<section><h2>Measured on fresh games</h2><p class="note">The kept net (age 140, 16.4 minutes of training) on 2000 games per mode that training never used, against scripted bots.</p><ul class="facts"><li><b>79.8 %</b><span>duels won against the baseline bot</span></li><li><b>87.0 %</b><span>duels won against the four test bots</span></li><li><b>31.6 %</b><span>four-ball free-for-alls won (chance 25 %)</span></li><li><b>34.6 %</b><span>the baseline bot in the same free-for-all seat</span></li></ul></section>
+<section><h2>How run "main" learned</h2><p class="note">Win rate in the test games after every 10 generations (per cent). The net of this run is called Rico; its age is the generation.</p><div class="chart"><svg viewBox="0 0 760 300" role="img" aria-label="Win rates of run main over the generations">
+<line x1="44" x2="664" y1="266.0" y2="266.0" class="grid"/>
+<text x="36" y="270.0" class="tick" text-anchor="end">0</text>
+<line x1="44" x2="664" y1="203.5" y2="203.5" class="grid"/>
+<text x="36" y="207.5" class="tick" text-anchor="end">25</text>
+<line x1="44" x2="664" y1="141.0" y2="141.0" class="grid"/>
+<text x="36" y="145.0" class="tick" text-anchor="end">50</text>
+<line x1="44" x2="664" y1="78.5" y2="78.5" class="grid"/>
+<text x="36" y="82.5" class="tick" text-anchor="end">75</text>
+<line x1="44" x2="664" y1="16.0" y2="16.0" class="grid"/>
+<text x="36" y="20.0" class="tick" text-anchor="end">100</text>
+<text x="44.0" y="288" class="tick" text-anchor="middle">0</text>
+<text x="116.9" y="288" class="tick" text-anchor="middle">20</text>
+<text x="189.9" y="288" class="tick" text-anchor="middle">40</text>
+<text x="262.8" y="288" class="tick" text-anchor="middle">60</text>
+<text x="335.8" y="288" class="tick" text-anchor="middle">80</text>
+<text x="408.7" y="288" class="tick" text-anchor="middle">100</text>
+<text x="481.6" y="288" class="tick" text-anchor="middle">120</text>
+<text x="554.6" y="288" class="tick" text-anchor="middle">140</text>
+<text x="627.5" y="288" class="tick" text-anchor="middle">160</text>
+<text x="664" y="288" class="tick" text-anchor="end" dx="-4" dy="-14">generation</text>
+<line x1="44" x2="664" y1="203.5" y2="203.5" class="chance"/>
+<text x="672" y="207.5" class="lab chance-lab">chance in FFA</text>
+<polyline points="44.0,266.0 80.5,244.0 116.9,163.5 153.4,102.8 189.9,105.2 226.4,74.8 262.8,71.0 299.3,54.0 335.8,61.0 372.2,52.3 408.7,49.8 445.2,50.5 481.6,45.5 518.1,45.5 554.6,40.5 591.1,45.2 627.5,44.0 664.0,43.5" class="line duel" fill="none"/>
+<circle cx="664.0" cy="43.5" r="4" class="dot duel"/>
+<text x="672" y="47.5" class="lab duel-lab">Duel 89.0</text>
+<polyline points="44.0,266.0 80.5,253.5 116.9,233.5 153.4,222.2 189.9,223.5 226.4,201.5 262.8,208.5 299.3,191.5 335.8,202.8 372.2,187.8 408.7,184.0 445.2,191.5 481.6,184.0 518.1,191.5 554.6,178.5 591.1,182.2 627.5,183.5 664.0,184.0" class="line ffa" fill="none"/>
+<circle cx="664.0" cy="184.0" r="4" class="dot ffa"/>
+<text x="672" y="188.0" class="lab ffa-lab">Free-for-all 32.8</text>
+</svg></div></section>
+<section>
+  <h2>All nets</h2>
+  <p class="note">Duel: share of 600 test duels won against four scripted bots. Free-for-all: share of 400
+  four-ball rounds in which it was the last ball on the disc, against three of those bots. Score: the mean of
+  the two. The same test games every time, so rows compare directly.</p>
+  <div class="table"><table>
+    <thead><tr><th class="num">#</th><th>Net</th><th class="num">Age</th><th class="num">Minutes</th><th>Duel wins %</th><th>Free-for-all wins %</th><th class="num">Score</th></tr></thead>
+    <tbody><tr><td class="num">1</td><td><strong>Rico the Finisher</strong> <span class="kept" title="Was the best net of its run when it was tested">kept</span><small>Is on your heels the whole time, ends rounds quickly</small></td><td class="num">140</td><td class="num">16.4</td><td><div class="bar"><span class="fill duel" style="width:90.2%"></span><b>90.2</b></div></td><td><div class="bar"><span class="fill ffa" style="width:35.0%"></span><b>35.0</b></div></td><td class="num score">62.6</td></tr><tr><td class="num">2</td><td><strong>Rico the Finisher</strong> <small>Is on your heels the whole time, ends rounds quickly</small></td><td class="num">170</td><td class="num">19.7</td><td><div class="bar"><span class="fill duel" style="width:89.0%"></span><b>89.0</b></div></td><td><div class="bar"><span class="fill ffa" style="width:32.8%"></span><b>32.8</b></div></td><td class="num score">60.9</td></tr><tr><td class="num">3</td><td><strong>Rico the Finisher</strong> <small>Keeps ramming you without a pause, ends rounds quickly</small></td><td class="num">160</td><td class="num">18.6</td><td><div class="bar"><span class="fill duel" style="width:88.8%"></span><b>88.8</b></div></td><td><div class="bar"><span class="fill ffa" style="width:33.0%"></span><b>33.0</b></div></td><td class="num score">60.9</td></tr><tr><td class="num">4</td><td><strong>Rico the Finisher</strong> <small>Is on your heels the whole time, ends rounds quickly</small></td><td class="num">150</td><td class="num">17.5</td><td><div class="bar"><span class="fill duel" style="width:88.3%"></span><b>88.3</b></div></td><td><div class="bar"><span class="fill ffa" style="width:33.5%"></span><b>33.5</b></div></td><td class="num score">60.9</td></tr><tr><td class="num">5</td><td><strong>Rico the Finisher</strong> <span class="kept" title="Was the best net of its run when it was tested">kept</span><small>Keeps ramming you without a pause, ends rounds quickly</small></td><td class="num">120</td><td class="num">14.3</td><td><div class="bar"><span class="fill duel" style="width:88.2%"></span><b>88.2</b></div></td><td><div class="bar"><span class="fill ffa" style="width:32.8%"></span><b>32.8</b></div></td><td class="num score">60.5</td></tr><tr><td class="num">6</td><td><strong>Rico the Finisher</strong> <span class="kept" title="Was the best net of its run when it was tested">kept</span><small>Is on your heels the whole time, ends rounds quickly</small></td><td class="num">100</td><td class="num">12.2</td><td><div class="bar"><span class="fill duel" style="width:86.5%"></span><b>86.5</b></div></td><td><div class="bar"><span class="fill ffa" style="width:32.8%"></span><b>32.8</b></div></td><td class="num score">59.6</td></tr><tr><td class="num">7</td><td><strong>Rico the Finisher</strong> <small>Keeps ramming you without a pause, ends rounds quickly</small></td><td class="num">130</td><td class="num">15.3</td><td><div class="bar"><span class="fill duel" style="width:88.2%"></span><b>88.2</b></div></td><td><div class="bar"><span class="fill ffa" style="width:29.8%"></span><b>29.8</b></div></td><td class="num score">59.0</td></tr><tr><td class="num">8</td><td><strong>Rico the Finisher</strong> <span class="kept" title="Was the best net of its run when it was tested">kept</span><small>Is on your heels the whole time, ends rounds quickly</small></td><td class="num">90</td><td class="num">11.1</td><td><div class="bar"><span class="fill duel" style="width:85.5%"></span><b>85.5</b></div></td><td><div class="bar"><span class="fill ffa" style="width:31.3%"></span><b>31.3</b></div></td><td class="num score">58.4</td></tr><tr><td class="num">9</td><td><strong>Rico the Finisher</strong> <small>Is on your heels the whole time, ends rounds quickly</small></td><td class="num">110</td><td class="num">13.3</td><td><div class="bar"><span class="fill duel" style="width:86.2%"></span><b>86.2</b></div></td><td><div class="bar"><span class="fill ffa" style="width:29.8%"></span><b>29.8</b></div></td><td class="num score">58.0</td></tr><tr><td class="num">10</td><td><strong>Rico the Finisher</strong> <span class="kept" title="Was the best net of its run when it was tested">kept</span><small>Is on your heels the whole time, ends rounds quickly</small></td><td class="num">70</td><td class="num">8.8</td><td><div class="bar"><span class="fill duel" style="width:84.8%"></span><b>84.8</b></div></td><td><div class="bar"><span class="fill ffa" style="width:29.8%"></span><b>29.8</b></div></td><td class="num score">57.3</td></tr><tr><td class="num">11</td><td><strong>Rico the Hunter</strong> <small>Is on your heels the whole time</small></td><td class="num">80</td><td class="num">10.0</td><td><div class="bar"><span class="fill duel" style="width:82.0%"></span><b>82.0</b></div></td><td><div class="bar"><span class="fill ffa" style="width:25.3%"></span><b>25.3</b></div></td><td class="num score">53.6</td></tr><tr><td class="num">12</td><td><strong>Rico the Finisher</strong> <span class="kept" title="Was the best net of its run when it was tested">kept</span><small>Keeps ramming you without a pause, ends rounds quickly</small></td><td class="num">50</td><td class="num">6.4</td><td><div class="bar"><span class="fill duel" style="width:76.5%"></span><b>76.5</b></div></td><td><div class="bar"><span class="fill ffa" style="width:25.8%"></span><b>25.8</b></div></td><td class="num score">51.1</td></tr><tr><td class="num">13</td><td><strong>Rico the Finisher</strong> <small>Is on your heels the whole time, ends rounds quickly</small></td><td class="num">60</td><td class="num">7.6</td><td><div class="bar"><span class="fill duel" style="width:78.0%"></span><b>78.0</b></div></td><td><div class="bar"><span class="fill ffa" style="width:23.0%"></span><b>23.0</b></div></td><td class="num score">50.5</td></tr><tr><td class="num">14</td><td><strong>Rico the Sprinter</strong> <span class="kept" title="Was the best net of its run when it was tested">kept</span><small>Is on your heels the whole time, is nearly always at full speed</small></td><td class="num">30</td><td class="num">3.9</td><td><div class="bar"><span class="fill duel" style="width:65.3%"></span><b>65.3</b></div></td><td><div class="bar"><span class="fill ffa" style="width:17.5%"></span><b>17.5</b></div></td><td class="num score">41.4</td></tr><tr><td class="num">15</td><td><strong>Rico the Brawler</strong> <small>Keeps ramming you without a pause, wriggles out when it is nearly off</small></td><td class="num">40</td><td class="num">5.2</td><td><div class="bar"><span class="fill duel" style="width:64.3%"></span><b>64.3</b></div></td><td><div class="bar"><span class="fill ffa" style="width:17.0%"></span><b>17.0</b></div></td><td class="num score">40.7</td></tr><tr><td class="num">16</td><td><strong>Rico the Brawler</strong> <span class="kept" title="Was the best net of its run when it was tested">kept</span><small>Keeps ramming you without a pause, wriggles out when it is nearly off</small></td><td class="num">20</td><td class="num">2.6</td><td><div class="bar"><span class="fill duel" style="width:41.0%"></span><b>41.0</b></div></td><td><div class="bar"><span class="fill ffa" style="width:13.0%"></span><b>13.0</b></div></td><td class="num score">27.0</td></tr><tr><td class="num">17</td><td><strong>Rico the Hunter</strong> <span class="kept" title="Was the best net of its run when it was tested">kept</span><small>Is on your heels the whole time</small></td><td class="num">10</td><td class="num">1.1</td><td><div class="bar"><span class="fill duel" style="width:8.8%"></span><b>8.8</b></div></td><td><div class="bar"><span class="fill ffa" style="width:5.0%"></span><b>5.0</b></div></td><td class="num score">6.9</td></tr><tr><td class="num">18</td><td><strong>Rico the Lemming</strong> <span class="kept" title="Was the best net of its run when it was tested">kept</span><small>Rolls off the disc all by itself</small></td><td class="num">0</td><td class="num">0.0</td><td><div class="bar"><span class="fill duel" style="width:0.0%"></span><b>0.0</b></div></td><td><div class="bar"><span class="fill ffa" style="width:0.0%"></span><b>0.0</b></div></td><td class="num score">0.0</td></tr></tbody>
+  </table></div>
+</section>
+
+</main>

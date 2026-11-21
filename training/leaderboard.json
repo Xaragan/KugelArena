@@ -1,0 +1,589 @@
+{
+	"nets": [
+		{
+			"duel": 0.902,
+			"ffa": 0.35,
+			"generation": 140,
+			"kept": true,
+			"minutes": 16.4,
+			"name": "Rico the Finisher",
+			"plays": "Is on your heels the whole time, ends rounds quickly",
+			"profile": {
+				"centre": 0.332,
+				"chase": 0.967,
+				"escapes": 0.167,
+				"ffa_win": 0.2,
+				"games": 60.0,
+				"hits": 13.4,
+				"items": 0.617,
+				"seconds": 20.3,
+				"speed": 0.806,
+				"win_vs_bot": 0.85
+			},
+			"run": "main",
+			"score": 0.626,
+			"stars": 5
+		},
+		{
+			"duel": 0.89,
+			"ffa": 0.328,
+			"generation": 170,
+			"kept": false,
+			"minutes": 19.7,
+			"name": "Rico the Finisher",
+			"plays": "Is on your heels the whole time, ends rounds quickly",
+			"profile": {
+				"centre": 0.333,
+				"chase": 0.961,
+				"escapes": 0.217,
+				"ffa_win": 0.25,
+				"games": 60.0,
+				"hits": 16.4,
+				"items": 0.683,
+				"seconds": 19.3,
+				"speed": 0.816,
+				"win_vs_bot": 1.0
+			},
+			"run": "main",
+			"score": 0.609,
+			"stars": 5
+		},
+		{
+			"duel": 0.888,
+			"ffa": 0.33,
+			"generation": 160,
+			"kept": false,
+			"minutes": 18.6,
+			"name": "Rico the Finisher",
+			"plays": "Keeps ramming you without a pause, ends rounds quickly",
+			"profile": {
+				"centre": 0.343,
+				"chase": 0.964,
+				"escapes": 0.267,
+				"ffa_win": 0.35,
+				"games": 60.0,
+				"hits": 18.3,
+				"items": 0.683,
+				"seconds": 19.6,
+				"speed": 0.817,
+				"win_vs_bot": 0.9
+			},
+			"run": "main",
+			"score": 0.609,
+			"stars": 5
+		},
+		{
+			"duel": 0.883,
+			"ffa": 0.335,
+			"generation": 150,
+			"kept": false,
+			"minutes": 17.5,
+			"name": "Rico the Finisher",
+			"plays": "Is on your heels the whole time, ends rounds quickly",
+			"profile": {
+				"centre": 0.34,
+				"chase": 0.962,
+				"escapes": 0.117,
+				"ffa_win": 0.15,
+				"games": 60.0,
+				"hits": 10.9,
+				"items": 0.617,
+				"seconds": 17.2,
+				"speed": 0.817,
+				"win_vs_bot": 0.85
+			},
+			"run": "main",
+			"score": 0.609,
+			"stars": 5
+		},
+		{
+			"duel": 0.882,
+			"ffa": 0.328,
+			"generation": 120,
+			"kept": true,
+			"minutes": 14.3,
+			"name": "Rico the Finisher",
+			"plays": "Keeps ramming you without a pause, ends rounds quickly",
+			"profile": {
+				"centre": 0.34,
+				"chase": 0.961,
+				"escapes": 0.2,
+				"ffa_win": 0.15,
+				"games": 60.0,
+				"hits": 22.0,
+				"items": 0.683,
+				"seconds": 21.5,
+				"speed": 0.793,
+				"win_vs_bot": 0.9
+			},
+			"run": "main",
+			"score": 0.605,
+			"stars": 5
+		},
+		{
+			"duel": 0.865,
+			"ffa": 0.328,
+			"generation": 100,
+			"kept": true,
+			"minutes": 12.2,
+			"name": "Rico the Finisher",
+			"plays": "Is on your heels the whole time, ends rounds quickly",
+			"profile": {
+				"centre": 0.342,
+				"chase": 0.953,
+				"escapes": 0.267,
+				"ffa_win": 0.25,
+				"games": 60.0,
+				"hits": 17.3,
+				"items": 0.6,
+				"seconds": 19.9,
+				"speed": 0.806,
+				"win_vs_bot": 0.85
+			},
+			"run": "main",
+			"score": 0.596,
+			"stars": 5
+		},
+		{
+			"duel": 0.882,
+			"ffa": 0.298,
+			"generation": 130,
+			"kept": false,
+			"minutes": 15.3,
+			"name": "Rico the Finisher",
+			"plays": "Keeps ramming you without a pause, ends rounds quickly",
+			"profile": {
+				"centre": 0.331,
+				"chase": 0.964,
+				"escapes": 0.167,
+				"ffa_win": 0.25,
+				"games": 60.0,
+				"hits": 19.6,
+				"items": 0.733,
+				"seconds": 20.0,
+				"speed": 0.801,
+				"win_vs_bot": 0.8
+			},
+			"run": "main",
+			"score": 0.59,
+			"stars": 5
+		},
+		{
+			"duel": 0.855,
+			"ffa": 0.313,
+			"generation": 90,
+			"kept": true,
+			"minutes": 11.1,
+			"name": "Rico the Finisher",
+			"plays": "Is on your heels the whole time, ends rounds quickly",
+			"profile": {
+				"centre": 0.352,
+				"chase": 0.953,
+				"escapes": 0.333,
+				"ffa_win": 0.2,
+				"games": 60.0,
+				"hits": 13.2,
+				"items": 0.9,
+				"seconds": 20.8,
+				"speed": 0.795,
+				"win_vs_bot": 0.95
+			},
+			"run": "main",
+			"score": 0.584,
+			"stars": 5
+		},
+		{
+			"duel": 0.862,
+			"ffa": 0.298,
+			"generation": 110,
+			"kept": false,
+			"minutes": 13.3,
+			"name": "Rico the Finisher",
+			"plays": "Is on your heels the whole time, ends rounds quickly",
+			"profile": {
+				"centre": 0.339,
+				"chase": 0.957,
+				"escapes": 0.267,
+				"ffa_win": 0.3,
+				"games": 60.0,
+				"hits": 18.5,
+				"items": 0.75,
+				"seconds": 20.9,
+				"speed": 0.803,
+				"win_vs_bot": 0.95
+			},
+			"run": "main",
+			"score": 0.58,
+			"stars": 5
+		},
+		{
+			"duel": 0.848,
+			"ffa": 0.298,
+			"generation": 70,
+			"kept": true,
+			"minutes": 8.8,
+			"name": "Rico the Finisher",
+			"plays": "Is on your heels the whole time, ends rounds quickly",
+			"profile": {
+				"centre": 0.337,
+				"chase": 0.927,
+				"escapes": 0.15,
+				"ffa_win": 0.1,
+				"games": 60.0,
+				"hits": 15.3,
+				"items": 0.783,
+				"seconds": 20.4,
+				"speed": 0.771,
+				"win_vs_bot": 0.65
+			},
+			"run": "main",
+			"score": 0.573,
+			"stars": 4
+		},
+		{
+			"duel": 0.82,
+			"ffa": 0.253,
+			"generation": 80,
+			"kept": false,
+			"minutes": 10.0,
+			"name": "Rico the Hunter",
+			"plays": "Is on your heels the whole time",
+			"profile": {
+				"centre": 0.342,
+				"chase": 0.949,
+				"escapes": 0.333,
+				"ffa_win": 0.2,
+				"games": 60.0,
+				"hits": 16.8,
+				"items": 0.767,
+				"seconds": 23.2,
+				"speed": 0.769,
+				"win_vs_bot": 0.75
+			},
+			"run": "main",
+			"score": 0.536,
+			"stars": 5
+		},
+		{
+			"duel": 0.765,
+			"ffa": 0.258,
+			"generation": 50,
+			"kept": true,
+			"minutes": 6.4,
+			"name": "Rico the Finisher",
+			"plays": "Keeps ramming you without a pause, ends rounds quickly",
+			"profile": {
+				"centre": 0.333,
+				"chase": 0.947,
+				"escapes": 0.367,
+				"ffa_win": 0.3,
+				"games": 60.0,
+				"hits": 18.7,
+				"items": 0.9,
+				"seconds": 20.6,
+				"speed": 0.787,
+				"win_vs_bot": 0.7
+			},
+			"run": "main",
+			"score": 0.511,
+			"stars": 4
+		},
+		{
+			"duel": 0.78,
+			"ffa": 0.23,
+			"generation": 60,
+			"kept": false,
+			"minutes": 7.6,
+			"name": "Rico the Finisher",
+			"plays": "Is on your heels the whole time, ends rounds quickly",
+			"profile": {
+				"centre": 0.331,
+				"chase": 0.938,
+				"escapes": 0.2,
+				"ffa_win": 0.2,
+				"games": 60.0,
+				"hits": 17.3,
+				"items": 0.75,
+				"seconds": 20.4,
+				"speed": 0.796,
+				"win_vs_bot": 0.75
+			},
+			"run": "main",
+			"score": 0.505,
+			"stars": 5
+		},
+		{
+			"duel": 0.653,
+			"ffa": 0.175,
+			"generation": 30,
+			"kept": true,
+			"minutes": 3.9,
+			"name": "Rico the Sprinter",
+			"plays": "Is on your heels the whole time, is nearly always at full speed",
+			"profile": {
+				"centre": 0.339,
+				"chase": 0.968,
+				"escapes": 0.117,
+				"ffa_win": 0.2,
+				"games": 60.0,
+				"hits": 11.6,
+				"items": 0.683,
+				"seconds": 18.6,
+				"speed": 0.809,
+				"win_vs_bot": 0.4
+			},
+			"run": "main",
+			"score": 0.414,
+			"stars": 3
+		},
+		{
+			"duel": 0.643,
+			"ffa": 0.17,
+			"generation": 40,
+			"kept": false,
+			"minutes": 5.2,
+			"name": "Rico the Brawler",
+			"plays": "Keeps ramming you without a pause, wriggles out when it is nearly off",
+			"profile": {
+				"centre": 0.339,
+				"chase": 0.969,
+				"escapes": 0.45,
+				"ffa_win": 0.2,
+				"games": 60.0,
+				"hits": 25.4,
+				"items": 0.817,
+				"seconds": 24.4,
+				"speed": 0.755,
+				"win_vs_bot": 0.5
+			},
+			"run": "main",
+			"score": 0.407,
+			"stars": 3
+		},
+		{
+			"duel": 0.41,
+			"ffa": 0.13,
+			"generation": 20,
+			"kept": true,
+			"minutes": 2.6,
+			"name": "Rico the Brawler",
+			"plays": "Keeps ramming you without a pause, wriggles out when it is nearly off",
+			"profile": {
+				"centre": 0.333,
+				"chase": 0.941,
+				"escapes": 0.467,
+				"ffa_win": 0.1,
+				"games": 60.0,
+				"hits": 56.0,
+				"items": 0.833,
+				"seconds": 30.8,
+				"speed": 0.658,
+				"win_vs_bot": 0.3
+			},
+			"run": "main",
+			"score": 0.27,
+			"stars": 2
+		},
+		{
+			"duel": 0.088,
+			"ffa": 0.05,
+			"generation": 10,
+			"kept": true,
+			"minutes": 1.1,
+			"name": "Rico the Hunter",
+			"plays": "Is on your heels the whole time",
+			"profile": {
+				"centre": 0.336,
+				"chase": 0.744,
+				"escapes": 0.333,
+				"ffa_win": 0.05,
+				"games": 60.0,
+				"hits": 22.7,
+				"items": 0.733,
+				"seconds": 29.5,
+				"speed": 0.597,
+				"win_vs_bot": 0.1
+			},
+			"run": "main",
+			"score": 0.069,
+			"stars": 1
+		},
+		{
+			"duel": 0.0,
+			"ffa": 0.0,
+			"generation": 0,
+			"kept": true,
+			"minutes": 0.0,
+			"name": "Rico the Lemming",
+			"plays": "Rolls off the disc all by itself",
+			"profile": {
+				"centre": 0.672,
+				"chase": -0.306,
+				"escapes": 0.0,
+				"ffa_win": 0.0,
+				"games": 60.0,
+				"hits": 0.0,
+				"items": 0.0,
+				"seconds": 3.0,
+				"speed": 0.358,
+				"win_vs_bot": 0.0
+			},
+			"run": "main",
+			"score": 0.0,
+			"stars": 1
+		}
+	],
+	"runs": [
+		{
+			"first_name": "Rico",
+			"run": "main",
+			"tests": [
+				{
+					"duel": 0.0,
+					"ffa": 0.0,
+					"generation": 0,
+					"kept": true,
+					"minutes": 0.0,
+					"score": 0.0
+				},
+				{
+					"duel": 0.088,
+					"ffa": 0.05,
+					"generation": 10,
+					"kept": true,
+					"minutes": 1.1,
+					"score": 0.069
+				},
+				{
+					"duel": 0.41,
+					"ffa": 0.13,
+					"generation": 20,
+					"kept": true,
+					"minutes": 2.6,
+					"score": 0.27
+				},
+				{
+					"duel": 0.653,
+					"ffa": 0.175,
+					"generation": 30,
+					"kept": true,
+					"minutes": 3.9,
+					"score": 0.414
+				},
+				{
+					"duel": 0.643,
+					"ffa": 0.17,
+					"generation": 40,
+					"kept": false,
+					"minutes": 5.2,
+					"score": 0.407
+				},
+				{
+					"duel": 0.765,
+					"ffa": 0.258,
+					"generation": 50,
+					"kept": true,
+					"minutes": 6.4,
+					"score": 0.511
+				},
+				{
+					"duel": 0.78,
+					"ffa": 0.23,
+					"generation": 60,
+					"kept": false,
+					"minutes": 7.6,
+					"score": 0.505
+				},
+				{
+					"duel": 0.848,
+					"ffa": 0.298,
+					"generation": 70,
+					"kept": true,
+					"minutes": 8.8,
+					"score": 0.573
+				},
+				{
+					"duel": 0.82,
+					"ffa": 0.253,
+					"generation": 80,
+					"kept": false,
+					"minutes": 10.0,
+					"score": 0.536
+				},
+				{
+					"duel": 0.855,
+					"ffa": 0.313,
+					"generation": 90,
+					"kept": true,
+					"minutes": 11.1,
+					"score": 0.584
+				},
+				{
+					"duel": 0.865,
+					"ffa": 0.328,
+					"generation": 100,
+					"kept": true,
+					"minutes": 12.2,
+					"score": 0.596
+				},
+				{
+					"duel": 0.862,
+					"ffa": 0.298,
+					"generation": 110,
+					"kept": false,
+					"minutes": 13.3,
+					"score": 0.58
+				},
+				{
+					"duel": 0.882,
+					"ffa": 0.328,
+					"generation": 120,
+					"kept": true,
+					"minutes": 14.3,
+					"score": 0.605
+				},
+				{
+					"duel": 0.882,
+					"ffa": 0.298,
+					"generation": 130,
+					"kept": false,
+					"minutes": 15.3,
+					"score": 0.59
+				},
+				{
+					"duel": 0.902,
+					"ffa": 0.35,
+					"generation": 140,
+					"kept": true,
+					"minutes": 16.4,
+					"score": 0.626
+				},
+				{
+					"duel": 0.883,
+					"ffa": 0.335,
+					"generation": 150,
+					"kept": false,
+					"minutes": 17.5,
+					"score": 0.609
+				},
+				{
+					"duel": 0.888,
+					"ffa": 0.33,
+					"generation": 160,
+					"kept": false,
+					"minutes": 18.6,
+					"score": 0.609
+				},
+				{
+					"duel": 0.89,
+					"ffa": 0.328,
+					"generation": 170,
+					"kept": false,
+					"minutes": 19.7,
+					"score": 0.609
+				}
+			]
+		}
+	],
+	"written": "2026-11-22 00:01:26"
+}

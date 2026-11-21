@@ -1,0 +1,9 @@
+{
+  "fresh_note": "The kept net (age 140, 16.4 minutes of training) on 2000 games per mode that training never used, against scripted bots.",
+  "fresh": {
+    "duels won against the baseline bot": "79.8 %",
+    "duels won against the four test bots": "87.0 %",
+    "four-ball free-for-alls won (chance 25 %)": "31.6 %",
+    "the baseline bot in the same free-for-all seat": "34.6 %"
+  }
+}
