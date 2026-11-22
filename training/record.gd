@@ -56,6 +56,7 @@ func _initialize() -> void:
 				players.append(Bot.standard(game_seed * 2 + i))
 		sim.reset(game_seed, TIME_LIMIT)
 		recorder.begin(game_seed, names)
+		recorder.note_layout(sim)
 		while sim.result == Sim.RUNNING:
 			if sim.tick % Sim.DECISION_TICKS == 0:
 				for i in 2:

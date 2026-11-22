@@ -33,6 +33,8 @@ var via_steam := false
 var players := {}                 # peer id -> name; the host is peer 1
 var settings := {"balls": 2}      # chosen by the host
 var inputs := {}                  # host only: peer id -> thrust (Vector2)
+var dashes := {}                  # host only: peer id -> direction of a requested dodge
+var version := ""                 # this build; host and guests must match
 var my_name := "Player"
 var status := ""                  # last thing worth telling the player
 
@@ -214,7 +216,7 @@ func _begin_hosting(text: String) -> void:
 
 func _on_connected() -> void:
 	status = "Connected. Waiting for the host to start."
-	_hello.rpc_id(1, my_name)
+	_hello.rpc_id(1, my_name, version)
 	lobby_changed.emit()
 
 
@@ -226,6 +228,7 @@ func _on_peer_disconnected(id: int) -> void:
 	if hosting and players.has(id):
 		players.erase(id)
 		inputs.erase(id)
+		dashes.erase(id)
 		_send_lobby()
 
 
@@ -265,20 +268,37 @@ func _close(reason: String) -> void:
 
 
 # ------------------------------------------------------------------------------
-# Messages. Client -> host: _hello, _thrust. Host -> clients: the rest.
+# Messages. Client -> host: _hello, _thrust, _dash. Host -> clients: the rest.
 # ------------------------------------------------------------------------------
 
 @rpc("any_peer", "call_remote", "reliable")
-func _hello(player_name: String) -> void:
+func _hello(player_name: String, their_version: String = "") -> void:
 	if not hosting:
 		return
 	var id := multiplayer.get_remote_sender_id()
+	if their_version != version:
+		# Different builds disagree about the rules and the messages.
+		_refuse.rpc_id(id, "The host plays version %s, you have %s. Both need the same version: download the newest one." % [
+			version, their_version if their_version != "" else "an older one"])
+		get_tree().create_timer(1.0).timeout.connect(func() -> void:
+			# The guest usually leaves by itself once it has read the message.
+			if hosting and id in multiplayer.get_peers():
+				multiplayer.multiplayer_peer.disconnect_peer(id))
+		status = "%s tried to join with another version of the game (%s) and was turned away." % [
+			player_name.substr(0, 24), their_version if their_version != "" else "older"]
+		lobby_changed.emit()
+		return
 	if players.size() >= MAX_PLAYERS:
 		multiplayer.multiplayer_peer.disconnect_peer(id)
 		return
 	var clean := player_name.strip_edges().substr(0, 24)
 	players[id] = clean if clean != "" else "Player %d" % players.size()
 	_send_lobby()
+
+
+@rpc("authority", "call_remote", "reliable")
+func _refuse(reason: String) -> void:
+	_close(reason)
 
 
 @rpc("authority", "call_remote", "reliable")
@@ -292,6 +312,12 @@ func _lobby(state: Dictionary) -> void:
 func _thrust(x: float, y: float) -> void:
 	if hosting:
 		inputs[multiplayer.get_remote_sender_id()] = Vector2(x, y).limit_length(1.0)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _dash(x: float, y: float) -> void:
+	if hosting:
+		dashes[multiplayer.get_remote_sender_id()] = Vector2(x, y)
 
 
 @rpc("authority", "call_remote", "reliable")
@@ -318,6 +344,12 @@ func send_input(thrust: Vector2) -> void:
 	if active and not hosting and multiplayer.multiplayer_peer.get_connection_status() == \
 			MultiplayerPeer.CONNECTION_CONNECTED:
 		_thrust.rpc_id(1, thrust.x, thrust.y)
+
+
+func send_dash(direction: Vector2) -> void:
+	if active and not hosting and multiplayer.multiplayer_peer.get_connection_status() == \
+			MultiplayerPeer.CONNECTION_CONNECTED:
+		_dash.rpc_id(1, direction.x, direction.y)
 
 
 func send_round_start(info: Dictionary) -> void:

@@ -51,6 +51,7 @@ static func measure(weights: PackedFloat32Array) -> Dictionary:
 			bots.append(Bot.standard(game_seed + i) if kind != 1 and i != my_seat else null)
 		sim.reset(game_seed, 90.0, count)
 		recorder.begin(game_seed, [])
+		recorder.note_layout(sim)
 		while sim.result == Sim.RUNNING:
 			if sim.tick % Sim.DECISION_TICKS == 0:
 				for i in count:

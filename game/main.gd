@@ -21,11 +21,11 @@ const NetGame = preload("res://game/net_game.gd")
 
 const NET_PATH := "res://net/rival_net.json"
 ## Version of this build; compared with the newest release on GitHub at start.
-const VERSION := "0.3"
+const VERSION := "0.4"
 const RELEASES_API := "https://api.github.com/repos/Xaragan/KugelArena/releases/latest"
 const DOWNLOAD_PAGE := "github.com/Xaragan/KugelArena/releases/latest"
 const RUNS_DIR := "res://training/runs"
-const PIXELS_PER_UNIT := 32.0
+const PIXELS_PER_UNIT := 320.0 / Sim.ARENA_RADIUS
 const CENTRE := Vector2(640.0, 372.0)
 const PLAYER := 0
 const RIVAL := 1
@@ -59,7 +59,11 @@ const COL_ITEM: Array[Color] = [Color(1.0, 0.78, 0.20), Color(0.40, 0.90, 0.45),
 	Color(0.66, 0.70, 0.85), Color(0.45, 0.90, 1.0), Color(0.92, 0.45, 0.95)]
 const ITEM_LETTER: Array[String] = ["P", "S", "A", "F", "X"]
 const ITEM_HELP: Array[String] = ["heavy ball: pushes harder", "more thrust and top speed",
-	"grip: you slide far less", "the others get sluggish", "blast that throws the others away"]
+	"more grip, shorter skids", "the others get sluggish", "blast that throws the others away"]
+const ZONE_HELP: Array[String] = ["solid, bouncy", "no way through", "fall in and you are out",
+	"slippery", "slows you down", "pushes you along"]
+const ZONE_COLOR: Array[Color] = [Color(0.72, 0.76, 0.88), Color(0.10, 0.11, 0.17),
+	Color(0.03, 0.03, 0.05), Color(0.55, 0.85, 1.0), Color(0.60, 0.42, 0.24), Color(0.90, 0.95, 1.0)]
 const FX_NAME: Array[String] = ["Power", "Speed", "Anchor", "Frozen"]
 const FX_COLOR: Array[Color] = [Color(1.0, 0.78, 0.20), Color(0.40, 0.90, 0.45),
 	Color(0.66, 0.70, 0.85), Color(0.45, 0.90, 1.0)]
@@ -201,6 +205,7 @@ func _ready() -> void:
 			ball_count = clampi(int(arg.trim_prefix("--balls=")), 2, Sim.MAX_BALLS)
 	net = NetGame.new()
 	net.name = "Net"   # same path on every machine: Main/Net
+	net.version = VERSION
 	add_child(net)
 	net.entered_lobby.connect(func() -> void: _set_mode(MODE_LOBBY))
 	net.lobby_changed.connect(_refresh_lobby)
@@ -665,7 +670,16 @@ func _new_round() -> void:
 		for i in ball_count:
 			peers[i] = seat_peer[i] if seat_peer[i] > 1 else (1 if i == my_seat else 0)
 		net.send_round_start({"balls": ball_count, "names": seat_names, "peers": peers,
-			"item_slots": sim.item_kind.size(), "score": score, "draws": draws})
+			"item_slots": sim.item_kind.size(), "score": score, "draws": draws,
+			"zones": _zones_as_list()})
+
+
+## Dodge in the direction of the keys held (or the way the ball is moving).
+func _dodge() -> void:
+	if net_role == "client":
+		net.send_dash(_player_thrust())
+	else:
+		sim.dash(my_seat, _player_thrust())
 
 
 func _player_thrust() -> Vector2:
@@ -692,6 +706,10 @@ func _live_step(_delta: float) -> void:
 		for i in sim.n:
 			if seat_peer[i] > 1 and sim.alive[i] == 1:
 				sim.set_thrust(i, net.inputs.get(seat_peer[i], Vector2.ZERO))
+				if net.dashes.has(seat_peer[i]):
+					sim.dash(i, net.dashes[seat_peer[i]])
+		if net_role == "host":
+			net.dashes.clear()
 		if sim.tick % Sim.DECISION_TICKS == 0:
 			for i in sim.n:
 				if sim.alive[i] == 1 and seat_brains[i] != null:
@@ -710,6 +728,8 @@ func _live_step(_delta: float) -> void:
 						list.append(["pickup", at.x, at.y, e["who"], e["kind"]])
 					"fall":
 						list.append(["fall", at.x, at.y, e["who"]])
+					"dash":
+						list.append(["dash", at.x, at.y, e["who"]])
 			if not list.is_empty():
 				net.send_events(list)
 			if sim.tick % STATE_SEND_TICKS == 0 or sim.result != Sim.RUNNING:
@@ -740,6 +760,8 @@ func _show_events(events: Array) -> void:
 				var kind: int = e["kind"]
 				texts.append({"at": e["at"], "age": 0.0, "text": Sim.ITEM_NAMES[kind] + "!",
 					"color": COL_ITEM[kind]})
+			"dash":
+				flashes.append({"at": e["at"], "age": 0.0, "strength": 2.5})
 			"fall":
 				var who: int = e["who"]
 				if who < fall_time.size():
@@ -942,7 +964,30 @@ func _pack_state() -> PackedFloat32Array:
 	for s in sim.item_kind.size():
 		data.append_array(PackedFloat32Array([sim.item_kind[s], sim.item_pos[s].x, sim.item_pos[s].y]))
 	data.append_array(sim.fx)
+	data.append_array(sim.dash_cd)
 	return data
+
+
+## The round's obstacles and zones as [kind, x, y, radius, wind x, wind y] each.
+func _zones_as_list() -> Array:
+	var list := []
+	for z in sim.zone_kind.size():
+		list.append([sim.zone_kind[z], sim.zone_pos[z].x, sim.zone_pos[z].y, sim.zone_radius[z],
+			sim.zone_dir[z].x, sim.zone_dir[z].y])
+	return list
+
+
+## Replaces the sim's obstacles and zones (for a replay or a joined game).
+func _set_zones(list: Array) -> void:
+	sim.zone_kind.clear()
+	sim.zone_pos.clear()
+	sim.zone_radius.clear()
+	sim.zone_dir.clear()
+	for z: Array in list:
+		sim.zone_kind.append(int(z[0]))
+		sim.zone_pos.append(Vector2(z[1], z[2]))
+		sim.zone_radius.append(float(z[3]))
+		sim.zone_dir.append(Vector2(z[4], z[5]))
 
 
 # --- what a client does with the host's messages -------------------------------
@@ -954,6 +999,7 @@ func _on_net_round_start(info: Dictionary) -> void:
 	sim.reset(1, 0.0, ball_count)
 	sim.item_kind.resize(int(info["item_slots"]))
 	sim.item_pos.resize(sim.item_kind.size())
+	_set_zones(info.get("zones", []))
 	seat_names.clear()
 	seat_brains.clear()
 	seat_peer.clear()
@@ -995,6 +1041,10 @@ func _on_net_state(data: PackedFloat32Array) -> void:
 		at += 3
 	for k in sim.fx.size():
 		sim.fx[k] = data[at + k]
+	at += sim.fx.size()
+	if data.size() >= at + sim.n:
+		for i in sim.n:
+			sim.dash_cd[i] = data[at + i]
 	if state == STATE_READY:
 		state = STATE_PLAYING
 		state_time = 0.0
@@ -1013,6 +1063,8 @@ func _on_net_events(list: Array) -> void:
 				events.append({"type": "pickup", "at": at, "who": int(e[3]), "kind": int(e[4])})
 			"fall":
 				events.append({"type": "fall", "at": at, "who": int(e[3])})
+			"dash":
+				events.append({"type": "dash", "at": at, "who": int(e[3])})
 	_show_events(events)
 
 
@@ -1064,6 +1116,7 @@ func _load_battle(index: int) -> void:
 	sim.reset(1, 0.0, int(replay.get("n", 2)))
 	sim.item_kind.resize(int(replay.get("item_slots", 2)))
 	sim.item_pos.resize(sim.item_kind.size())
+	_set_zones(replay.get("zones", []))
 	fall_time.resize(sim.n)
 	fall_time.fill(-1.0)
 	timeline.max_value = replay_len
@@ -1211,6 +1264,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			KEY_HOME:
 				_seek(0.0)
 		return
+	if (code == KEY_SPACE or code == KEY_SHIFT) and mode == MODE_PLAY and state == STATE_PLAYING \
+			and my_seat >= 0 and sim.alive[my_seat] == 1:
+		_dodge()
+		return
 	if net_role == "client":
 		return  # only the host starts rounds
 	match code:
@@ -1277,6 +1334,8 @@ func _draw() -> void:
 	if mode == MODE_MENU or mode == MODE_FRIENDS or mode == MODE_LOBBY:
 		return
 
+	_draw_zones()
+
 	for s in sim.item_kind.size():
 		var kind := sim.item_kind[s]
 		if kind < 0:
@@ -1301,6 +1360,58 @@ func _draw() -> void:
 			Color(t["color"], 1.0 - k))
 
 	_draw_hud(names)
+
+
+## Obstacles and zones: patches first, then holes, then the solid things.
+func _draw_zones() -> void:
+	for layer in 3:
+		for z in sim.zone_kind.size():
+			var kind := sim.zone_kind[z]
+			# A zone is gone once the shrinking disc has passed its centre.
+			if kind < 0 or sim.zone_pos[z].length() > sim.radius:
+				continue
+			var its_layer := 0 if kind >= Sim.ZONE_ICE else (1 if kind == Sim.ZONE_HOLE else 2)
+			if its_layer != layer:
+				continue
+			var at := _to_screen(sim.zone_pos[z])
+			var r := sim.zone_radius[z] * PIXELS_PER_UNIT
+			var colour := ZONE_COLOR[kind]
+			match kind:
+				Sim.ZONE_ICE:
+					draw_circle(at, r, Color(colour, 0.22))
+					draw_arc(at, r, 0.0, TAU, 48, Color(colour, 0.5), 1.5, true)
+					draw_line(at + Vector2(-r * 0.4, -r * 0.2), at + Vector2(r * 0.1, -r * 0.5), Color(1, 1, 1, 0.3), 1.5, true)
+					draw_line(at + Vector2(-r * 0.1, r * 0.4), at + Vector2(r * 0.45, r * 0.05), Color(1, 1, 1, 0.3), 1.5, true)
+				Sim.ZONE_MUD:
+					draw_circle(at, r, Color(colour, 0.4))
+					draw_arc(at, r, 0.0, TAU, 48, Color(colour, 0.7), 1.5, true)
+					for k in 5:
+						draw_circle(at + Vector2.from_angle(k * 1.9 + z) * r * 0.5, 2.5, Color(colour, 0.8))
+				Sim.ZONE_WIND:
+					draw_circle(at, r, Color(colour, 0.06))
+					draw_arc(at, r, 0.0, TAU, 48, Color(colour, 0.25), 1.0, true)
+					# Chevrons drifting the way the wind blows.
+					var dir := sim.zone_dir[z]
+					var side := Vector2(-dir.y, dir.x)
+					var drift := fmod(Time.get_ticks_msec() / 1000.0, 1.0)
+					for k in 3:
+						var along := (fmod(k / 3.0 + drift, 1.0) - 0.5) * 1.3 * r
+						var fade := 1.0 - absf(along) / (0.65 * r)
+						var tip := at + dir * (along + 7.0)
+						draw_line(tip, tip - dir * 9.0 + side * 8.0, Color(colour, 0.6 * fade), 2.0, true)
+						draw_line(tip, tip - dir * 9.0 - side * 8.0, Color(colour, 0.6 * fade), 2.0, true)
+				Sim.ZONE_HOLE:
+					draw_circle(at, r, colour)
+					draw_arc(at, r, 0.0, TAU, 40, Color(1.0, 0.35, 0.3, 0.9), 2.0, true)
+					draw_arc(at, r * 0.6, 0.0, TAU, 32, Color(1.0, 0.35, 0.3, 0.25), 1.0, true)
+				Sim.ZONE_BLOCK:
+					draw_circle(at, r, colour)
+					draw_arc(at, r, 0.0, TAU, 48, Color(0.5, 0.54, 0.68), 2.5, true)
+					draw_arc(at, r * 0.7, 0.0, TAU, 40, Color(0.5, 0.54, 0.68, 0.25), 1.0, true)
+				_:
+					draw_circle(at + Vector2(2, 3), r, Color(0, 0, 0, 0.3))
+					draw_circle(at, r, colour)
+					draw_circle(at - Vector2(r, r) * 0.3, r * 0.3, Color(1, 1, 1, 0.3))
 
 
 ## The name of every ball in the current game.
@@ -1360,7 +1471,11 @@ func _draw_hud(names: Array[String]) -> void:
 	else:
 		_text(str(score[me]), Vector2(40, 130), 64, COL_TEXT)
 		if playing:
-			_text("W A S D  move", Vector2(40, 170), 16, COL_DIM)
+			_text("W A S D  move      Space  dodge", Vector2(40, 170), 14, COL_DIM)
+			# Dodge: full bar = ready.
+			var ready := 1.0 - clampf(sim.dash_cd[me] / Sim.DASH_COOLDOWN, 0.0, 1.0)
+			draw_rect(Rect2(40, 180, 200, 6), Color(1, 1, 1, 0.08))
+			draw_rect(Rect2(40, 180, 200 * ready, 6), COL_BALL[me] if ready >= 1.0 else COL_DIM)
 	_draw_effects(me, Vector2(40, 215))
 	if duel:
 		_text(names[foe], Vector2(985, 60), 20, COL_BALL[foe])
@@ -1392,6 +1507,16 @@ func _draw_hud(names: Array[String]) -> void:
 		_text_centred("You are out - place %d of %d.   %s" % [sim.place[me], sim.n,
 			"Space: new round" if net_role == "" else "The round goes on without you."],
 			Vector2(CENTRE.x, 700), 16, Color(1.0, 0.6, 0.4))
+
+	# Field legend.
+	_text("ON THE DISC", Vector2(40, 334), 12, COL_DIM)
+	for k in Sim.ZONE_KINDS:
+		var zy := 354.0 + k * 18.0
+		draw_circle(Vector2(48, zy - 4), 6.0, Color(ZONE_COLOR[k], 1.0 if k <= Sim.ZONE_BLOCK else 0.7))
+		if k == Sim.ZONE_HOLE or k == Sim.ZONE_BLOCK:
+			draw_arc(Vector2(48, zy - 4), 6.0, 0.0, TAU, 16,
+				Color(1.0, 0.35, 0.3) if k == Sim.ZONE_HOLE else Color(0.5, 0.54, 0.68), 1.5, true)
+		_text("%s  -  %s" % [Sim.ZONE_NAMES[k], ZONE_HELP[k]], Vector2(62, zy), 12, COL_DIM)
 
 	# Item legend.
 	_text("ITEMS", Vector2(40, 470), 15, COL_DIM)
@@ -1466,7 +1591,7 @@ func _draw_effects(who: int, at: Vector2) -> void:
 		_text(FX_NAME[k], Vector2(at.x, y), 15, FX_COLOR[k])
 		draw_rect(Rect2(at.x, y + 6, 130, 5), Color(1, 1, 1, 0.08))
 		draw_rect(Rect2(at.x, y + 6, 130 * left / Sim.FX_DURATION[k], 5), FX_COLOR[k])
-		y += 34.0
+		y += 27.0
 
 
 func _banner(headline: String, sub: String, colour: Color = COL_TEXT) -> void:

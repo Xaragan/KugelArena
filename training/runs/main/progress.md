@@ -11,5 +11,7 @@ The last number column is the share of decided games won against the kept net.
 
 | generation | minutes trained | duel wins % | free-for-all wins % | score | duel length s | vs kept net % | note |
 |---:|---:|---:|---:|---:|---:|---:|---|
-| 0 | 0.0 | 0.0 | 0.0 | 0.0 | 6.9 | - | kept as best |
-| 10 | 1.7 | 26.7 | 6.3 | 16.5 | 28.8 | - | kept as best |
+| 0 | 0.0 | 0.2 | 0.0 | 0.1 | 13.0 | - | kept as best |
+| 10 | 3.3 | 20.8 | 3.0 | 11.9 | 32.7 | - | kept as best |
+| 20 | 6.7 | 40.3 | 8.5 | 24.4 | 24.9 | - | kept as best |
+| 30 | 9.3 | 42.8 | 16.5 | 29.7 | 20.2 | - | kept as best |

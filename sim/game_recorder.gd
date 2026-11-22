@@ -14,13 +14,14 @@ extends RefCounted
 
 const Sim = preload("res://sim/arena_sim.gd")
 
-const FORMAT := "kugelarena-game-3"
+const FORMAT := "kugelarena-game-4"
 const PER_BALL := 7
 
 var _rows: Array = []
 var _events: Array = []
 var _seed := 0
 var _players: Array = []
+var _zones: Array = []   # the round's obstacles and zones: [kind, x, y, radius, wind x, wind y]
 
 
 static func col_radius(n: int) -> int:
@@ -41,6 +42,16 @@ func begin(game_seed: int, players: Array) -> void:
 	_events = []
 	_seed = game_seed
 	_players = players.duplicate()
+	_zones = []
+
+
+## Call once after sim.reset(): stores the round's obstacles and zones.
+func note_layout(sim: Sim) -> void:
+	_zones = []
+	for z in sim.zone_kind.size():
+		_zones.append([sim.zone_kind[z], snappedf(sim.zone_pos[z].x, 0.001),
+			snappedf(sim.zone_pos[z].y, 0.001), snappedf(sim.zone_radius[z], 0.001),
+			snappedf(sim.zone_dir[z].x, 0.001), snappedf(sim.zone_dir[z].y, 0.001)])
 
 
 ## Call once per decision step, after the thrusts are set.
@@ -76,6 +87,8 @@ func note_events(sim: Sim) -> void:
 				_events.append([t, "pickup", e["who"], e["kind"]])
 			"fall":
 				_events.append([t, "fall", e["who"], e["by"]])
+			"dash":
+				_events.append([t, "dash", e["who"]])
 
 
 func finish(sim: Sim) -> Dictionary:
@@ -93,6 +106,7 @@ func finish(sim: Sim) -> Dictionary:
 		"seed": _seed,
 		"n": sim.n,
 		"item_slots": sim.item_kind.size(),
+		"zones": _zones,
 		"players": _players,
 		"result": result,
 		"places": Array(sim.place),
@@ -110,6 +124,7 @@ func finish(sim: Sim) -> Dictionary:
 ## measured while the ball was on the disc.
 ##   hits          collisions in the game
 ##   pickups       items collected
+##   dashes        dodges used
 ##   knockouts     rivals pushed off
 ##   lead_changes  how often the ball with the most room to the edge changed
 ##   escapes       times a ball was within 0.8 of the edge and got 2.0 away again
@@ -126,7 +141,9 @@ func _stats(sim: Sim) -> Dictionary:
 	var speed := []
 	var chase := []
 	var rows_alive := []
+	var dashes := []
 	for i in n:
+		dashes.append(0)
 		pickups.append(0)
 		escapes.append(0)
 		danger.append(false)
@@ -139,6 +156,8 @@ func _stats(sim: Sim) -> Dictionary:
 			hits += 1
 		elif e[1] == "pickup":
 			pickups[int(e[2])] += 1
+		elif e[1] == "dash":
+			dashes[int(e[2])] += 1
 	var lead_changes := 0
 	var leader := -1
 	var c_radius := col_radius(n)
@@ -185,7 +204,7 @@ func _stats(sim: Sim) -> Dictionary:
 		dist[i] = snappedf(dist[i] / count, 0.001)
 		speed[i] = snappedf(speed[i] / count, 0.001)
 		chase[i] = snappedf(chase[i] / count, 0.001)
-	return {"hits": hits, "pickups": pickups, "knockouts": Array(sim.knockouts),
+	return {"hits": hits, "pickups": pickups, "dashes": dashes, "knockouts": Array(sim.knockouts),
 		"lead_changes": lead_changes, "escapes": escapes, "centre_dist": dist, "speed": speed,
 		"chase": chase, "final_radius": snappedf(sim.radius, 0.01)}
 

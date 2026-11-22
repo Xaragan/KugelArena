@@ -11,6 +11,9 @@ foreach ($item in @("project.godot", "KugelArena.bat", "README.md", "LICENSE", "
 New-Item -ItemType Directory -Force (Join-Path $stage "tools\godot") | Out-Null
 Copy-Item (Join-Path $root "tools\godot\*.exe") (Join-Path $stage "tools\godot")
 New-Item -ItemType File -Force (Join-Path $stage "tools\.gdignore") | Out-Null
+# Tells Godot to load the Steam extension without the editor having scanned the project.
+New-Item -ItemType Directory -Force (Join-Path $stage ".godot") | Out-Null
+Set-Content -Path (Join-Path $stage ".godot\extension_list.cfg") -Value "res://addons/godotsteam/godotsteam.gdextension" -Encoding ascii
 # Of the training runs only what the menu and the replays show.
 Get-ChildItem (Join-Path $root "training\runs") -Directory | ForEach-Object {
     $target = Join-Path $stage ("training\runs\" + $_.Name)

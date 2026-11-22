@@ -15,5 +15,7 @@ trends, not single rows.
 
 | generation | game s | hits | items | escapes | from centre % | speed % | chase | beats bot | in words |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
-| 0 | 19.0 | 25.5 | 0.1 | 0.1 | 62 | 26 | +0 | 0 of 4 | does not seek the fight, lives near the edge |
-| 10 | 36.4 | 88.7 | 0.5 | 0.3 | 37 | 47 | +89 | 1 of 4 | hunts the rival |
+| 0 | 28.7 | 4.8 | 0.1 | 0.0 | 67 | 19 | -14 | 0 of 4 | does not seek the fight, lives near the edge |
+| 10 | 48.5 | 41.2 | 0.3 | 0.3 | 32 | 51 | +85 | 0 of 4 | hunts the rival, holds the middle |
+| 20 | 35.1 | 35.1 | 0.7 | 0.1 | 35 | 63 | +96 | 3 of 4 | hunts the rival, holds the middle |
+| 30 | 35.2 | 34.3 | 0.7 | 0.1 | 34 | 81 | +96 | 2 of 4 | hunts the rival, holds the middle |

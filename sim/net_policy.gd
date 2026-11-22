@@ -1,19 +1,20 @@
 extends RefCounted
 ## The rival's brain: a small fully connected net, evaluated in plain GDScript.
 ##
-## 49 inputs (see ArenaSim.observe) -> 32 tanh -> 16 tanh -> 2 tanh.
-## The two outputs are a thrust vector in the ball's own frame (x = towards the
-## nearest rival, y = a quarter turn to the left); act() turns it back into arena space.
+## 87 inputs (see ArenaSim.observe) -> 32 tanh -> 16 tanh -> 3 tanh.
+## The first two outputs are a thrust vector in the ball's own frame (x = towards
+## the nearest rival, y = a quarter turn to the left); act() turns it back into
+## arena space. The third output asks for a dodge when it is above 0.5.
 ## All weights live in one flat array: per layer the weight matrix row by row
 ## (one row per output neuron), then the biases.
 
 const Sim = preload("res://sim/arena_sim.gd")
 
-const N_IN := 49
+const N_IN := 87
 const N_H1 := 32
 const N_H2 := 16
-const N_OUT := 2
-const FORMAT := "kugelarena-net-2"
+const N_OUT := 3
+const FORMAT := "kugelarena-net-3"
 
 var weights := PackedFloat32Array()
 var _obs := PackedFloat32Array()
@@ -47,7 +48,8 @@ func _layer(src: PackedFloat32Array, dst: PackedFloat32Array, offset: int,
 	return bias_at + n_out
 
 
-## Thrust for ball `who` in arena space, length at most 1.
+## Thrust for ball `who` in arena space, length at most 1. Also triggers the
+## ball's dodge in that direction when the net asks for it.
 func act(sim: Sim, who: int) -> Vector2:
 	sim.observe(who, _obs)
 	var at := _layer(_obs, _h1, 0, N_IN, N_H1)
@@ -57,7 +59,11 @@ func act(sim: Sim, who: int) -> Vector2:
 	var ey := Vector2(-ex.y, ex.x)
 	var t := ex * _out[0] + ey * _out[1]
 	var l := t.length()
-	return t / l if l > 1.0 else t
+	if l > 1.0:
+		t /= l
+	if _out[2] > 0.5 and sim.dash_cd[who] <= 0.0:
+		sim.dash(who, t)
+	return t
 
 
 static func save_weights(path: String, w: PackedFloat32Array, info: Dictionary) -> bool:

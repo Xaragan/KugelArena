@@ -1,7 +1,7 @@
 {
-  "fresh_note": "Version 0.2 changed the collision physics, so the nets started again from zero and were stopped after 2.0 minutes of training. The kept net (age 10) on 1000 games per mode that training never used, against scripted bots.",
+  "fresh_note": "Version 0.4 changed the rules again (dodge, bigger disc, obstacles and zones, weaker items), so the nets started from zero and have trained for 10.1 minutes. The kept net (age 30) on 1000 games per mode that training never used, against scripted bots.",
   "fresh": {
-    "duels won against the baseline bot": "8.6 %",
-    "four-ball free-for-alls won (chance 25 %)": "6.8 %"
+    "duels won against the baseline bot": "37.0 %",
+    "four-ball free-for-alls won (chance 25 %)": "14.2 %"
   }
 }

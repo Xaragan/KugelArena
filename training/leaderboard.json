@@ -1,51 +1,99 @@
 {
 	"nets": [
 		{
-			"duel": 0.267,
-			"ffa": 0.063,
-			"generation": 10,
+			"duel": 0.428,
+			"ffa": 0.165,
+			"generation": 30,
 			"kept": true,
-			"minutes": 1.7,
-			"name": "Rico the Brawler",
-			"plays": "Keeps ramming you without a pause",
+			"minutes": 9.3,
+			"name": "Rico the Sprinter",
+			"plays": "Is on your heels the whole time, leaves the items alone",
 			"profile": {
-				"centre": 0.343,
-				"chase": 0.847,
-				"escapes": 0.433,
-				"ffa_win": 0.05,
+				"centre": 0.314,
+				"chase": 0.968,
+				"escapes": 0.083,
+				"ffa_win": 0.1,
 				"games": 60.0,
-				"hits": 25.1,
-				"items": 0.6,
-				"seconds": 26.4,
-				"speed": 0.475,
-				"win_vs_bot": 0.0
+				"hits": 16.3,
+				"items": 0.267,
+				"seconds": 19.3,
+				"speed": 0.818,
+				"win_vs_bot": 0.3
 			},
 			"run": "main",
-			"score": 0.165,
-			"stars": 1
+			"score": 0.297,
+			"stars": 2
 		},
 		{
-			"duel": 0.0,
+			"duel": 0.403,
+			"ffa": 0.085,
+			"generation": 20,
+			"kept": true,
+			"minutes": 6.7,
+			"name": "Rico the Hunter",
+			"plays": "Is on your heels the whole time, leaves the items alone",
+			"profile": {
+				"centre": 0.311,
+				"chase": 0.956,
+				"escapes": 0.15,
+				"ffa_win": 0.1,
+				"games": 60.0,
+				"hits": 16.9,
+				"items": 0.15,
+				"seconds": 23.9,
+				"speed": 0.712,
+				"win_vs_bot": 0.4
+			},
+			"run": "main",
+			"score": 0.244,
+			"stars": 3
+		},
+		{
+			"duel": 0.208,
+			"ffa": 0.03,
+			"generation": 10,
+			"kept": true,
+			"minutes": 3.3,
+			"name": "Rico the Hunter",
+			"plays": "Is on your heels the whole time, leaves the items alone",
+			"profile": {
+				"centre": 0.282,
+				"chase": 0.858,
+				"escapes": 0.083,
+				"ffa_win": 0.05,
+				"games": 60.0,
+				"hits": 20.4,
+				"items": 0.333,
+				"seconds": 30.6,
+				"speed": 0.525,
+				"win_vs_bot": 0.2
+			},
+			"run": "main",
+			"score": 0.119,
+			"stars": 2
+		},
+		{
+			"duel": 0.002,
 			"ffa": 0.0,
 			"generation": 0,
 			"kept": true,
 			"minutes": 0.0,
-			"name": "Rico the Lemming",
-			"plays": "Rolls off the disc all by itself",
+			"name": "Rico the Drifter",
+			"plays": "Drifts around without a plan, leaves the items alone",
 			"profile": {
-				"centre": 0.685,
-				"chase": -0.12,
-				"escapes": 0.05,
+				"centre": 0.694,
+				"chase": -0.154,
+				"escapes": 0.0,
 				"ffa_win": 0.0,
 				"games": 60.0,
-				"hits": 0.3,
-				"items": 0.017,
-				"seconds": 6.3,
-				"speed": 0.253,
+				"hits": 0.1,
+				"items": 0.033,
+				"seconds": 12.5,
+				"speed": 0.195,
 				"win_vs_bot": 0.0
 			},
 			"run": "main",
-			"score": 0.0,
+			"score": 0.001,
 			"stars": 1
 		}
 	],
@@ -55,23 +103,39 @@
 			"run": "main",
 			"tests": [
 				{
-					"duel": 0.0,
+					"duel": 0.002,
 					"ffa": 0.0,
 					"generation": 0,
 					"kept": true,
 					"minutes": 0.0,
-					"score": 0.0
+					"score": 0.001
 				},
 				{
-					"duel": 0.267,
-					"ffa": 0.063,
+					"duel": 0.208,
+					"ffa": 0.03,
 					"generation": 10,
 					"kept": true,
-					"minutes": 1.7,
-					"score": 0.165
+					"minutes": 3.3,
+					"score": 0.119
+				},
+				{
+					"duel": 0.403,
+					"ffa": 0.085,
+					"generation": 20,
+					"kept": true,
+					"minutes": 6.7,
+					"score": 0.244
+				},
+				{
+					"duel": 0.428,
+					"ffa": 0.165,
+					"generation": 30,
+					"kept": true,
+					"minutes": 9.3,
+					"score": 0.297
 				}
 			]
 		}
 	],
-	"written": "2026-11-22 00:47:41"
+	"written": "2026-11-22 01:22:03"
 }

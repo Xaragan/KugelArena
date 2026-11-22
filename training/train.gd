@@ -439,6 +439,7 @@ func _record_samples() -> void:
 			bots.append(Bot.standard(game_seed + i) if is_bot[i] else null)
 		sim.reset(game_seed, Match.TIME_LIMIT, is_bot.size())
 		recorder.begin(game_seed, names)
+		recorder.note_layout(sim)
 		while sim.result == Sim.RUNNING:
 			if sim.tick % Sim.DECISION_TICKS == 0:
 				for i in sim.n:
